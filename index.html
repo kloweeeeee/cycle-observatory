@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>天文经济周期观测站</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=JetBrains+Mono:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#060a14;--bg2:#0b1120;--card:#0d1526;--card-h:#111d34;
+  --brd:#162040;--brd2:#1e2d55;
+  --t1:#dcd9d2;--t2:#8a96b0;--t3:#4e5a72;
+  --cosmic:#00e5c8;--gold:#f0b429;--red:#ff4757;--blue:#4da6ff;
+  --purple:#a78bfa;--orange:#ff8c42;--teal:#2dd4bf;--pink:#f472b6;
+  --lime:#a3e635;--sky:#38bdf8;
+  --fd:'Playfair Display',Georgia,serif;
+  --fm:'JetBrains Mono',monospace;
+  --fb:'Noto Sans SC',-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t1);font-family:var(--fb);line-height:1.7;overflow-x:hidden}
+
+/* ===== STARS ===== */
+#stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.star{position:absolute;border-radius:50%;background:#fff}
+.star.twinkle{animation:twinkle var(--dur,3s) ease-in-out infinite alternate}
+@keyframes twinkle{0%{opacity:.2}100%{opacity:.8}}
+
+/* ===== LAYOUT ===== */
+.container{max-width:1400px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+/* ===== HERO ===== */
+.hero{
+  min-height:92vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  position:relative;padding:60px 24px 40px;
+}
+.hero::before{
+  content:'';position:absolute;top:50%;left:50%;
+  width:600px;height:600px;transform:translate(-50%,-50%);
+  border:1px solid rgba(0,229,200,.06);border-radius:50%;
+  pointer-events:none;
+}
+.hero::after{
+  content:'';position:absolute;top:50%;left:50%;
+  width:400px;height:400px;transform:translate(-50%,-50%);
+  border:1px solid rgba(240,180,41,.05);border-radius:50%;
+  pointer-events:none;
+}
+.hero-badge{
+  font-family:var(--fm);font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--cosmic);border:1px solid rgba(0,229,200,.25);
+  padding:6px 20px;border-radius:20px;margin-bottom:32px;
+  background:rgba(0,229,200,.04);
+}
+.hero h1{
+  font-family:var(--fd);font-weight:900;font-size:clamp(36px,6vw,72px);
+  letter-spacing:2px;margin-bottom:12px;
+  background:linear-gradient(135deg,var(--t1),var(--cosmic));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-date{
+  font-family:var(--fm);font-size:14px;color:var(--t2);margin-bottom:48px;
+  letter-spacing:1px;
+}
+.hero-date span{color:var(--gold)}
+
+/* ===== RISK GAUGE ===== */
+.gauge-wrap{margin-bottom:40px;position:relative}
+.gauge-svg{width:320px;height:180px}
+.gauge-bg{fill:none;stroke:var(--brd);stroke-width:12;stroke-linecap:round}
+.gauge-fill{fill:none;stroke-width:12;stroke-linecap:round;
+  stroke-dasharray:0 502;transition:stroke-dasharray 2s ease-out}
+.gauge-needle{transition:transform 2s cubic-bezier(.4,0,.2,1);transform-origin:160px 160px}
+.gauge-value{font-family:var(--fm);font-size:42px;font-weight:700;fill:var(--t1)}
+.gauge-label{font-family:var(--fb);font-size:13px;fill:var(--t2)}
+.gauge-title{
+  font-family:var(--fd);font-size:14px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--t2);margin-top:8px;
+}
+
+/* ===== KEY METRICS ===== */
+.metrics{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;margin-bottom:32px}
+.metric{text-align:center;min-width:120px}
+.metric-val{font-family:var(--fm);font-size:28px;font-weight:700}
+.metric-lbl{font-size:12px;color:var(--t2);margin-top:2px}
+.hero-summary{
+  max-width:700px;font-size:15px;color:var(--t2);line-height:1.8;
+  border-left:2px solid var(--cosmic);padding-left:20px;text-align:left;
+}
+
+/* ===== SECTION HEADERS ===== */
+.sec-header{
+  text-align:center;padding:80px 0 48px;position:relative;
+}
+.sec-header h2{
+  font-family:var(--fd);font-size:clamp(28px,4vw,44px);font-weight:700;
+  margin-bottom:8px;
+}
+.sec-header p{color:var(--t2);font-size:15px;max-width:600px;margin:0 auto}
+.sec-line{
+  width:60px;height:2px;background:var(--cosmic);margin:20px auto 0;
+  border-radius:1px;
+}
+
+/* ===== CYCLE CARDS ===== */
+.cycles-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:28px;
+  padding-bottom:80px;
+}
+.cycle-card{
+  background:var(--card);border:1px solid var(--brd);border-radius:16px;
+  padding:32px;position:relative;overflow:hidden;
+  transition:border-color .3s,transform .3s,box-shadow .3s;
+  opacity:0;transform:translateY(30px);
+}
+.cycle-card.visible{opacity:1;transform:translateY(0);transition:opacity .6s,transform .6s,border-color .3s,box-shadow .3s}
+.cycle-card:hover{border-color:var(--brd2);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.cycle-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--card-accent);border-radius:16px 16px 0 0;
+}
+
+.card-top{display:flex;align-items:flex-start;gap:24px;margin-bottom:20px}
+.card-ring{flex-shrink:0}
+.ring-svg{width:100px;height:100px}
+.ring-bg{fill:none;stroke:var(--brd);stroke-width:6}
+.ring-fg{fill:none;stroke-width:6;stroke-linecap:round;
+  stroke-dasharray:0 264;transition:stroke-dasharray 1.5s ease-out}
+.ring-text{font-family:var(--fm);font-size:13px;fill:var(--t2);text-anchor:middle}
+.ring-pct{font-family:var(--fm);font-size:20px;font-weight:700;fill:var(--t1);text-anchor:middle}
+
+.card-info{flex:1;min-width:0}
+.card-name{font-size:22px;font-weight:700;margin-bottom:2px}
+.card-name-en{font-family:var(--fd);font-size:12px;color:var(--t3);font-style:italic;letter-spacing:1px}
+.card-length{
+  display:inline-block;font-family:var(--fm);font-size:11px;
+  padding:3px 10px;border-radius:10px;margin-top:6px;
+  background:rgba(255,255,255,.05);color:var(--t2);letter-spacing:.5px;
+}
+
+.card-def{font-size:14px;color:var(--t2);margin-bottom:16px;line-height:1.6}
+
+/* Transmission chain */
+.chain{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.chain-step{
+  font-family:var(--fm);font-size:11px;padding:4px 10px;
+  border-radius:6px;background:rgba(255,255,255,.04);
+  border:1px solid var(--brd);color:var(--t2);white-space:nowrap;
+}
+.chain-arrow{color:var(--t3);font-size:10px;flex-shrink:0}
+
+/* Status */
+.card-status{
+  display:flex;align-items:center;gap:10px;margin-bottom:14px;
+  padding:10px 14px;background:rgba(0,0,0,.2);border-radius:8px;
+}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.status-phase{font-size:13px;font-weight:500}
+.status-risk{font-family:var(--fm);font-size:11px;margin-left:auto;letter-spacing:.5px}
+
+/* Events mini-timeline */
+.events{margin-bottom:14px}
+.events-title{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;font-family:var(--fm)}
+.event-row{display:flex;align-items:baseline;gap:10px;padding:3px 0}
+.event-year{font-family:var(--fm);font-size:12px;color:var(--t3);min-width:40px;text-align:right}
+.event-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:2px}
+.event-text{font-size:12px;color:var(--t2)}
+.event-text.future{color:var(--t3);font-style:italic}
+
+.card-impact{
+  font-size:13px;color:var(--t2);padding-top:12px;
+  border-top:1px solid var(--brd);line-height:1.7;
+}
+.impact-label{font-weight:500;color:var(--gold);font-size:11px;font-family:var(--fm);letter-spacing:1px;display:block;margin-bottom:2px}
+
+/* ===== MASTER TIMELINE ===== */
+.timeline-section{padding:60px 0 80px;position:relative}
+.timeline-section::before{
+  content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+  background:linear-gradient(180deg,transparent,rgba(0,229,200,.02) 50%,transparent);
+  pointer-events:none;
+}
+#timeline-svg{width:100%;height:500px}
+.tl-axis{stroke:var(--brd);stroke-width:1}
+.tl-year{font-family:var(--fm);font-size:10px;fill:var(--t3);text-anchor:middle}
+.tl-now-line{stroke:var(--red);stroke-width:2;stroke-dasharray:6 4;opacity:.8;animation:nowPulse 3s ease-in-out infinite}
+@keyframes nowPulse{0%,100%{opacity:.5;stroke-width:1.5}50%{opacity:1;stroke-width:3}}
+.tl-now-label{font-family:var(--fm);font-size:11px;fill:var(--red);text-anchor:middle;font-weight:700}
+.tl-event-dot{r:3;opacity:.7}
+.tl-event-label{font-family:var(--fb);font-size:9px;fill:var(--t2)}
+.tl-legend{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:20px}
+.tl-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2)}
+.tl-legend-dot{width:10px;height:3px;border-radius:2px}
+
+/* ===== SYNTHESIS ===== */
+.synthesis{padding:40px 0 120px}
+.synth-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:40px}
+.synth-panel{
+  background:var(--card);border:1px solid var(--brd);border-radius:16px;
+  padding:32px;
+}
+.synth-panel h3{
+  font-family:var(--fd);font-size:20px;margin-bottom:16px;
+  padding-bottom:12px;border-bottom:1px solid var(--brd);
+}
+.synth-panel p{font-size:14px;color:var(--t2);line-height:1.8;margin-bottom:12px}
+.synth-panel strong{color:var(--t1)}
+
+/* Forecast blocks */
+.forecast{margin-bottom:20px;padding:16px;border-radius:10px;border-left:3px solid}
+.forecast-period{font-family:var(--fm);font-size:13px;font-weight:700;margin-bottom:4px}
+.forecast-text{font-size:13px;color:var(--t2);line-height:1.7}
+.forecast-high{background:rgba(255,71,87,.06);border-color:var(--red)}
+.forecast-mid{background:rgba(240,180,41,.06);border-color:var(--gold)}
+.forecast-low{background:rgba(0,229,200,.06);border-color:var(--cosmic)}
+
+/* Advice */
+.advice-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.advice-item{padding:20px;background:rgba(0,0,0,.2);border-radius:10px;border:1px solid var(--brd)}
+.advice-item h4{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.advice-item p{font-size:13px;color:var(--t2);line-height:1.7}
+.advice-icon{font-size:18px}
+
+/* ===== FOOTER ===== */
+.footer{
+  text-align:center;padding:40px 24px;border-top:1px solid var(--brd);
+  font-size:12px;color:var(--t3);
+}
+.footer a{color:var(--cosmic);text-decoration:none}
+.footer em{font-style:italic;font-family:var(--fd)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .cycles-grid{grid-template-columns:1fr}
+  .synth-grid{grid-template-columns:1fr}
+  .advice-grid{grid-template-columns:1fr}
+  .hero h1{font-size:32px}
+  .metrics{gap:20px}
+}
+@media(max-width:600px){
+  .cycle-card{padding:20px}
+  .card-top{flex-direction:column;align-items:center;text-align:center}
+  .chain{justify-content:center}
+  .card-status{flex-direction:column;text-align:center}
+}
+
+/* ===== SCROLL REVEAL ===== */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s,transform .7s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+
+<!-- ==================== HERO ==================== -->
+<header class="hero">
+  <div class="hero-badge">ASTRO-ECONOMIC CYCLE OBSERVATORY</div>
+  <h1>天文经济周期<br>观测站</h1>
+  <div class="hero-date">观测时间 <span>2026.05.12</span> &nbsp;|&nbsp; 周期覆盖范围 1900 — 2060</div>
+
+  <!-- Risk Gauge -->
+  <div class="gauge-wrap">
+    <svg class="gauge-svg" viewBox="0 0 320 180">
+      <defs>
+        <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="var(--cosmic)"/>
+          <stop offset="50%" stop-color="var(--gold)"/>
+          <stop offset="100%" stop-color="var(--red)"/>
+        </linearGradient>
+      </defs>
+      <path class="gauge-bg" d="M 30 160 A 130 130 0 0 1 290 160"/>
+      <path class="gauge-fill" id="gaugeFill" d="M 30 160 A 130 130 0 0 1 290 160" stroke="url(#gaugeGrad)"/>
+      <line class="gauge-needle" id="gaugeNeedle" x1="160" y1="160" x2="160" y2="40" stroke="var(--t1)" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="160" cy="160" r="6" fill="var(--t1)"/>
+      <text class="gauge-value" x="160" y="145" text-anchor="middle" id="gaugeVal">0</text>
+      <text class="gauge-label" x="160" y="175" text-anchor="middle">/ 100</text>
+      <text x="30" y="178" text-anchor="middle" font-family="var(--fm)" font-size="9" fill="var(--cosmic)">安全</text>
+      <text x="290" y="178" text-anchor="middle" font-family="var(--fm)" font-size="9" fill="var(--red)">危险</text>
+    </svg>
+    <div class="gauge-title">综合周期风险指数</div>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-val" style="color:var(--red)">5 / 8</div>
+      <div class="metric-lbl">高风险周期数</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="color:var(--gold)">2026</div>
+      <div class="metric-lbl">丙午年 · 赤马红羊</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="color:var(--cosmic)">2030</div>
+      <div class="metric-lbl">K指数极小窗口</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val" style="color:var(--purple)">2049</div>
+      <div class="metric-lbl">下一康波危机点</div>
+    </div>
+  </div>
+
+  <div class="hero-summary">
+    2026年5月，8个天文-经济周期中有<strong style="color:var(--red)">5个处于高风险区间</strong>。K指数从2020极大持续下降趋向2030极小，太阳刚过第25周期极大进入下降期，第5次康波处于"冬天"尾声，美国霸权周期走过80%进入最后1/4。<strong style="color:var(--gold)">2026年本身即为丙午年——赤马红羊标记的危机窗口。</strong>
+  </div>
+</header>
+
+<!-- ==================== CYCLE CARDS ==================== -->
+<section class="container">
+  <div class="sec-header reveal">
+    <h2>八大嵌套周期</h2>
+    <p>从3年的库存波动到120年的霸权兴衰，天文力学如何一层层传导至人间经济</p>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="cycles-grid" id="cyclesGrid">
+    <!-- Cards injected by JS -->
+  </div>
+</section>
+
+<!-- ==================== MASTER TIMELINE ==================== -->
+<section class="timeline-section container">
+  <div class="sec-header reveal">
+    <h2>周期叠加总览</h2>
+    <p>1900—2060年全时段，八大周期的波峰波谷叠加在同一时间轴上</p>
+    <div class="sec-line"></div>
+  </div>
+  <svg id="timeline-svg" viewBox="0 0 1400 500"></svg>
+  <div class="tl-legend" id="tlLegend"></div>
+</section>
+
+<!-- ==================== SYNTHESIS ==================== -->
+<section class="synthesis container">
+  <div class="sec-header reveal">
+    <h2>综合研判与展望</h2>
+    <p>基于所有周期的当前位置，对未来5年的经济金融影响判断</p>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="synth-grid reveal">
+    <!-- Left: Assessment -->
+    <div class="synth-panel">
+      <h3 style="color:var(--cosmic)">当前态势判定</h3>
+      <p>2026年5月，<strong>多个长周期在压力区间形成共振</strong>。这不是单一周期的波动，而是不同时间尺度的力量同时指向同一方向——类似于海啸前的退潮。</p>
+      <p>核心压力来源：</p>
+      <p>1. <strong>K指数下降中段</strong>（趋向2030极小）——历史上K极小对应1930大萧条、1990苏联解体级别的结构性危机。</p>
+      <p>2. <strong>丙午年标记</strong>——古代"赤马红羊"的统计发现，2026年正好处于2019太阳极小后延迟7年的危机窗口。</p>
+      <p>3. <strong>康波转型</strong>——第5次康波（IT革命驱动）的冬天尾声，第6次（AI+新能源+生物科技）尚未真正启动。</p>
+      <p>4. <strong>霸权晚期</strong>——美国霸权进入最后1/4，全球秩序开始松动，地缘风险溢价持续升高。</p>
+    </div>
+
+    <!-- Right: Forecast -->
+    <div class="synth-panel">
+      <h3 style="color:var(--gold)">分阶段预测</h3>
+
+      <div class="forecast forecast-high">
+        <div class="forecast-period" style="color:var(--red)">2026 · 高风险窗口</div>
+        <div class="forecast-text">丙午年标记。多周期叠加压力年。突发性地缘/金融事件概率35-45%。金融市场波动显著加剧。防御为主，避免追高。</div>
+      </div>
+
+      <div class="forecast forecast-mid">
+        <div class="forecast-period" style="color:var(--gold)">2027-2028 · 虚假繁荣期</div>
+        <div class="forecast-text">太阳下降期但极端耀斑概率仍高（X14.3+）。经济可能短暂反弹——通胀回落、市场回升，但结构性问题未解。AI等技术泡沫可能在2027-2028达到高峰。</div>
+      </div>
+
+      <div class="forecast forecast-high">
+        <div class="forecast-period" style="color:var(--red)">2029-2030 · 最高风险窗口</div>
+        <div class="forecast-text">K指数极小 + 施瓦贝极小 + 哈尔周期尾声 → 三重周期叠加。理论框架中最危险的窗口。历史类比：1930年大萧条级别。全球性结构性危机概率40-60%。</div>
+      </div>
+
+      <div class="forecast forecast-low">
+        <div class="forecast-period" style="color:var(--cosmic)">2030+ · 重建窗口</div>
+        <div class="forecast-text">如果危机如约而至，2030前后是布局第六次康波的"黄金坑"。AI基础设施、新能源、生物科技将驱动下一轮长波。新兴市场可能受益于霸权周期转换。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Investment Advice -->
+  <div class="synth-panel reveal" style="margin-bottom:40px">
+    <h3 style="color:var(--gold)">对金融市场的具体影响</h3>
+    <div class="advice-grid">
+      <div class="advice-item">
+        <h4><span class="advice-icon" style="color:var(--red)">&#9888;</span> 风险规避 (2026-2028)</h4>
+        <p>降低杠杆率，增加现金和短期国债配置。黄金作为避险资产在多周期叠加期有超额收益。减少"拥挤交易"（高估值成长股、加密货币等）。地缘风险溢价推高能源和军工板块。</p>
+      </div>
+      <div class="advice-item">
+        <h4><span class="advice-icon" style="color:var(--cosmic)">&#9733;</span> 机会布局 (2028-2032)</h4>
+        <p>如果2029-2030危机兑现，将是近60年最佳的长期买入窗口。第六次康波的驱动力：AI基础设施（算力/芯片/能源）、新能源（储能/核聚变/氢能）、生物科技（基因编辑/长寿）。中国等新兴市场可能受益于霸权周期转换。</p>
+      </div>
+      <div class="advice-item">
+        <h4><span class="advice-icon" style="color:var(--gold)">&#9670;</span> 股市板块映射</h4>
+        <p>下降期受益：黄金矿业、国防军工、必需消费、医疗保健。下降期承压：高杠杆房地产、银行、周期性原材料。第六波主题：AI/半导体、清洁能源、精准医疗。</p>
+      </div>
+      <div class="advice-item">
+        <h4><span class="advice-icon" style="color:var(--purple)">&#9679;</span> 关键观察指标</h4>
+        <p>太阳黑子数（每月）——跟踪SC25下降速度。美国10年期-2年期国债利差——衰退预警。全球PMI——经济周期温度计。中美利差与汇率——霸权周期代理变量。地缘冲突频率——赤马红羊的"触发器"。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="synth-panel reveal" style="background:transparent;border-color:var(--brd);padding:24px">
+    <p style="font-size:13px;color:var(--t3);text-align:center;line-height:1.8">
+      <strong style="color:var(--t2)">声明</strong>：本页面基于天文-经济周期理论的推演框架，不代表投资建议。周期理论提供了观察宏观趋势的一种视角，但具体事件的发生时间和影响程度受人类社会缓冲能力、政策应对、技术进步等多重因素影响。<em>天文周期标记的是"高风险窗口"，不是宿命。</em>
+    </p>
+  </div>
+</section>
+
+<footer class="footer">
+  <p>数据来源：NOAA SWPC / SIDC / NASA Solar Dynamics Observatory / Belkacem et al. (2022) / Scafetta (2022) / 刘复刚等 (2013-2021)</p>
+  <p style="margin-top:8px">天文经济周期观测站 &copy; 2026 &nbsp;|&nbsp; 基于 <em>天文-人间周期理论</em> 构建</p>
+</footer>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const CYCLES = [
+  {
+    id:'inventory', name:'库存周期', nameEn:'Kitchin Cycle', length:'3~5 年',
+    accent:'var(--orange)',
+    def:'企业根据市场需求变化调整库存水平，引发的短期经济波动。是最基础的经济周期，由库存的"补-去"循环驱动。',
+    chain:['市场需求变化','企业调整库存','生产/采购波动','短期经济起伏'],
+    chainIcon:['📦','🔄','🏭','📈'],
+    pos:75, phase:'补库存后期', risk:'中等', riskLevel:55,
+    riskColor:'var(--gold)',
+    events:[
+      {y:2020,t:'疫情冲击 · 全球去库存',type:'trough'},
+      {y:2022,t:'补库存高峰',type:'peak'},
+      {y:2024,t:'被动去库存',type:'trough'},
+      {y:2026,t:'新一轮补库存中',type:'rising'},
+    ],
+    impact:'短期企业利润波动，直接影响原材料价格、制造业PMI和大宗商品走势。周期股（有色、化工）在补库存期表现较好。',
+    astro:'尚未建立明确天文对应',
+    period:4, refTrough:2024
+  },
+  {
+    id:'schwabe', name:'施瓦贝周期', nameEn:'Schwabe Cycle · 产能周期', length:'~11 年',
+    accent:'var(--cosmic)',
+    def:'太阳黑子数量的周期性变化，平均11.07年。与工业产能更新换代周期高度吻合，是连接天文与经济的关键桥梁。',
+    chain:['行星引力合力','太阳黑子周期','气候微变化','产能投资波动'],
+    chainIcon:['🪐','☀️','🌧️','🏭'],
+    pos:60, phase:'刚过极大 · 下降初期', risk:'中高', riskLevel:65,
+    riskColor:'var(--orange)',
+    events:[
+      {y:2001,t:'SC23 极大',type:'peak'},
+      {y:2008,t:'SC23 极小',type:'trough'},
+      {y:2014,t:'SC24 极大（弱周期）',type:'peak'},
+      {y:2019,t:'SC24 极小',type:'trough'},
+      {y:2024,t:'SC25 极大（超出预期）',type:'peak'},
+      {y:2030,t:'SC25 预计极小',type:'trough',future:true},
+    ],
+    impact:'设备更新换代周期，影响制造业投资和科技产业。太阳极大期能源需求上升，极小期农业承压。SC25超出预期，2027年后仍有极端耀斑风险。',
+    astro:'金星-地球-木星模型 → 11.07年基础节拍<br>木星-土星模型 → 9.93~11.86年调制',
+    period:11.07, refTrough:2019
+  },
+  {
+    id:'hale', name:'哈尔周期', nameEn:'Hale Cycle · 房地产周期', length:'~22 年',
+    accent:'var(--blue)',
+    def:'太阳磁场极性完成一次完整翻转的周期（2个施瓦贝），约22年。与房地产市场的人口结构+建筑寿命周期高度吻合。',
+    chain:['太阳磁极翻转','气候周期变化','人口/居住需求','房地产涨跌'],
+    chainIcon:['🧲','🌡️','👥','🏠'],
+    pos:82, phase:'周期尾声 · 接近极小', risk:'高', riskLevel:75,
+    riskColor:'var(--red)',
+    events:[
+      {y:1986,t:'日本广场协议后泡沫膨胀',type:'rising'},
+      {y:1990,t:'日本泡沫破裂',type:'peak'},
+      {y:2008,t:'美国次贷危机',type:'peak'},
+      {y:2014,t:'中国房价阶段性调整',type:'rising'},
+      {y:2021,t:'中国房企暴雷',type:'peak'},
+      {y:2030,t:'下一周期低点？',type:'trough',future:true},
+    ],
+    impact:'房地产是最大的资产类别。周期尾声意味着全球房地产承压——泡沫出清、价格调整。银行、建材、家电等关联行业同步受影响。',
+    astro:'2 × 木星公转周期 = 太阳磁极周期<br>人口世代更替 + 建筑物理寿命 ≈ 22年',
+    period:22, refTrough:2008
+  },
+  {
+    id:'kindex', name:'K指数周期', nameEn:'Jupiter-Saturn Configuration', length:'~20 年',
+    accent:'var(--purple)',
+    def:'木星-土星会合产生的行星系质心位移周期。K指数衡量两者位置关系：同侧直列（极大）或两侧对冲（极小），驱动太阳角动量和自转速度变化。',
+    chain:['木星+土星位置','太阳角动量变化','太阳自转速率','地球自转/气候'],
+    chainIcon:['🪐','⚛️','🔄','🌍'],
+    pos:60, phase:'K下降中段 → 趋向2030极小', risk:'高', riskLevel:80,
+    riskColor:'var(--red)',
+    events:[
+      {y:1930,t:'K极小 · 两侧对冲 → 大萧条',type:'min'},
+      {y:1950,t:'K极大 · 同侧直列',type:'max'},
+      {y:1970,t:'K极小',type:'min'},
+      {y:1990,t:'K极小 → 苏联解体',type:'min'},
+      {y:2020,t:'K极大 · 大合 → 新冠疫情',type:'max'},
+      {y:2030,t:'K极小（预测）→ ?',type:'min',future:true},
+    ],
+    impact:'K极小在历史上对应最严重的经济/政治危机：1930大萧条、1990苏联解体。K从极大到极小的约10年过渡期，系统性风险逐步积累。当前正处于这个积累期中段。',
+    astro:'木星(11.86年) + 土星(29.46年) 会合周期 ≈ 19.86年<br>K极大=同侧(K≈7.5) K极小=对冲(K≈0)',
+    period:20, refTrough:1930
+  },
+  {
+    id:'kondratieff', name:'康波周期', nameEn:'Kondratieff Wave', length:'~59 年',
+    accent:'var(--gold)',
+    def:'由技术革命驱动的长波经济周期（扩张-繁荣-衰退-萧条），约59年。对应5倍木星公转周期，是理解数十年级经济大势的核心框架。',
+    chain:['技术创新突破','产能大规模扩张','过度投资/泡沫','泡沫破裂/出清'],
+    chainIcon:['💡','🏗️','💸','📉'],
+    pos:61, phase:'第5波冬天尾声 · 第6波孕育', risk:'高', riskLevel:78,
+    riskColor:'var(--red)',
+    events:[
+      {y:1873,t:'第3波危机（铁路泡沫）',type:'crisis'},
+      {y:1930,t:'第4波危机（大萧条）',type:'crisis'},
+      {y:1970,t:'第4波尾声 · 滞胀',type:'crisis'},
+      {y:1990,t:'第5波起点 · 苏联解体/互联网',type:'spring'},
+      {y:2000,t:'互联网泡沫',type:'peak'},
+      {y:2008,t:'金融危机 · 冬天开始',type:'crisis'},
+      {y:2049,t:'第5波终点？下一危机窗口',type:'crisis',future:true},
+    ],
+    impact:'康波冬天=资产价格下跌+债务出清+旧技术衰落，但也是布局下一波新技术的"黄金窗口"。当前IT革命的红利耗尽，AI/新能源/生物科技正在孕育第六波。',
+    astro:'5 × 木星公转周期 = 59.3年<br>1990 + 59.3 = 2049.3 ≈ 下一危机点',
+    period:59.3, refTrough:1930
+  },
+  {
+    id:'gleissberg', name:'格莱斯堡周期', nameEn:'Gleissberg Cycle', length:'~85 年',
+    accent:'var(--teal)',
+    def:'太阳活动更长期的涨落周期，是施瓦贝周期的"包络线"。影响数十年级的气候变化趋势，与农业产量和社会长期适应能力相关。',
+    chain:['长期太阳活动涨落','持续性气候偏移','农业/生态变化','社会长期承压'],
+    chainIcon:['☀️','🌡️','🌾','🏛️'],
+    pos:66, phase:'周期中部偏后', risk:'中等', riskLevel:50,
+    riskColor:'var(--gold)',
+    events:[
+      {y:1645,t:'蒙德极小期开始',type:'min'},
+      {y:1715,t:'蒙德极小期结束',type:'max'},
+      {y:1970,t:'SC20弱周期 · 近代极小',type:'min'},
+      {y:2055,t:'下一极小（预测）',type:'min',future:true},
+    ],
+    impact:'长周期气候趋势影响农业产量、保险行业和基础设施建设。当前不是极小期，短期影响有限，但需关注2050年后的下降趋势。',
+    astro:'施瓦贝周期的振幅包络 ≈ 85年<br>蒙德极小期(1645-1715)是极端案例',
+    period:85, refTrough:1970
+  },
+  {
+    id:'hegemony', name:'霸权周期', nameEn:'Hegemony Cycle', length:'~120 年',
+    accent:'var(--red)',
+    def:'一个全球霸权国家从崛起到衰落的完整循环。技术领先→经济霸权→军事霸权→过度扩张→内部腐化→新挑战者崛起。',
+    chain:['技术/经济领先','全球霸权确立','过度扩张/腐化','新挑战者崛起'],
+    chainIcon:['🔬','💰','⚔️','🐉'],
+    pos:80, phase:'美国霸权最后1/4', risk:'高', riskLevel:82,
+    riskColor:'var(--red)',
+    events:[
+      {y:1815,t:'英国霸权巅峰（维也纳体系）',type:'peak'},
+      {y:1870,t:'英国相对衰落开始',type:'decline'},
+      {y:1930,t:'美国崛起（大萧条低点反转）',type:'rise'},
+      {y:1945,t:'布雷顿森林体系 · 美元霸权',type:'peak'},
+      {y:1971,t:'美元脱钩黄金',type:'decline'},
+      {y:2001,t:'9/11 · 反恐战争过度扩张',type:'decline'},
+      {y:2050,t:'霸权交接窗口？',type:'transition',future:true},
+    ],
+    impact:'霸权交接期=全球秩序重组。贸易规则、金融体系、技术标准都可能重构。地缘政治风险溢价推高能源、军工价格。新兴市场（中国、印度）可能受益。',
+    astro:'10 × 木星 = 2 × 康波 ≈ 118.6年<br>美国霸权 1930 + 120 = 2050',
+    period:120, refTrough:1930
+  },
+  {
+    id:'bingwu', name:'赤马红羊', nameEn:'Bingwu-Dingwei Cycle · 丙丁周期', length:'~60 年（不精确）',
+    accent:'var(--pink)',
+    def:'中国古代发现的统计现象：丙午/丁未年多灾异。现代理解：太阳黑子极小期的延迟响应——"星星动了，人间先扛几年，扛不住了才乱"。',
+    chain:['太阳黑子极小期','气候异常2-3年','粮食/能源累积承压','社会压力超阈值'],
+    chainIcon:['☀️','🌧️','🌾','⚡'],
+    pos:95, phase:'丙午年 · 危机窗口', risk:'极高', riskLevel:90,
+    riskColor:'var(--red)',
+    events:[
+      {y:1726,t:'丙午 · 雍正清洗异己（+4年延迟）',type:'crisis'},
+      {y:1786,t:'丙午 · 地震/洪水/叛乱（+3年）',type:'crisis'},
+      {y:1846,t:'丙午 · 水旱灾/回民暴乱（+4年）',type:'crisis'},
+      {y:1907,t:'丁未 · 黄河决口/起义（+6年）',type:'crisis'},
+      {y:1966,t:'丙午 · 文革开始（+3年）',type:'crisis'},
+      {y:2026,t:'丙午 · ?（+7年 · 延迟最长）',type:'crisis'},
+    ],
+    impact:'2026年本身就是丙午年。历史上平均延迟4.5年，2026年延迟7年为历史最长——现代社会缓冲能力更强，但积累的应力也更大。标记的是"高风险窗口"，不是确定性事件。',
+    astro:'太阳极小期(2019) + 社会缓冲延迟(3-7年)<br>天干地支60年周期与木星59.3年周期的近似对应',
+    period:60, refTrough:2019
+  }
+];
+
+// ============================================================
+// GENERATE STARS
+// ============================================================
+(function genStars(){
+  const c=document.getElementById('stars');
+  for(let i=0;i<200;i++){
+    const s=document.createElement('div');
+    s.className='star'+(Math.random()>.6?' twinkle':'');
+    const size=Math.random()*2+.5;
+    Object.assign(s.style,{
+      width:size+'px',height:size+'px',
+      left:Math.random()*100+'%',top:Math.random()*100+'%',
+      opacity:Math.random()*.5+.1,
+      '--dur':(2+Math.random()*4)+'s',
+      animationDelay:Math.random()*5+'s'
+    });
+    c.appendChild(s);
+  }
+})();
+
+// ============================================================
+// RENDER CYCLE CARDS
+// ============================================================
+(function renderCards(){
+  const grid=document.getElementById('cyclesGrid');
+  CYCLES.forEach((c,idx)=>{
+    const circumference=2*Math.PI*42;
+    const dashLen=(c.pos/100)*circumference;
+    const riskDot=c.riskLevel>=80?'var(--red)':c.riskLevel>=65?'var(--orange)':c.riskLevel>=45?'var(--gold)':'var(--cosmic)';
+
+    const eventsHTML=c.events.map(e=>`
+      <div class="event-row">
+        <span class="event-year">${e.y}</span>
+        <span class="event-dot" style="background:${e.future?'var(--t3)':e.type==='crisis'||e.type==='min'||e.type==='trough'?'var(--red)':e.type==='peak'||e.type==='max'?'var(--gold)':'var(--cosmic)'}"></span>
+        <span class="event-text${e.future?' future':''}">${e.t}</span>
+      </div>
+    `).join('');
+
+    const chainHTML=c.chain.map((step,i)=>`
+      <span class="chain-step">${c.chainIcon[i]||''} ${step}</span>
+      ${i<c.chain.length-1?'<span class="chain-arrow">→</span>':''}
+    `).join('');
+
+    grid.innerHTML+=`
+      <div class="cycle-card" style="--card-accent:${c.accent};transition-delay:${idx*80}ms" data-idx="${idx}">
+        <div class="card-top">
+          <div class="card-ring">
+            <svg class="ring-svg" viewBox="0 0 100 100">
+              <circle class="ring-bg" cx="50" cy="50" r="42" transform="rotate(-90 50 50)"/>
+              <circle class="ring-fg" cx="50" cy="50" r="42" transform="rotate(-90 50 50)"
+                style="stroke:${c.accent}" data-dash="${dashLen}" data-circ="${circumference}"/>
+              <text class="ring-pct" x="50" y="46">${c.pos}%</text>
+              <text class="ring-text" x="50" y="62">周期进度</text>
+            </svg>
+          </div>
+          <div class="card-info">
+            <div class="card-name">${c.name}</div>
+            <div class="card-name-en">${c.nameEn}</div>
+            <div class="card-length" style="color:${c.accent};border:1px solid ${c.accent}33">${c.length}</div>
+          </div>
+        </div>
+        <div class="card-def">${c.def}</div>
+        <div style="font-size:12px;color:var(--t3);margin-bottom:12px;font-style:italic;font-family:var(--fm);letter-spacing:0.3px">${c.astro}</div>
+        <div class="chain">${chainHTML}</div>
+        <div class="card-status">
+          <span class="status-dot" style="background:${riskDot}"></span>
+          <span class="status-phase">${c.phase}</span>
+          <span class="status-risk" style="color:${c.riskColor}">风险 ${c.risk}</span>
+        </div>
+        <div class="events">
+          <div class="events-title">历史事件</div>
+          ${eventsHTML}
+        </div>
+        <div class="card-impact">
+          <span class="impact-label">对经济/股市的影响</span>
+          ${c.impact}
+        </div>
+      </div>
+    `;
+  });
+})();
+
+// ============================================================
+// ANIMATE GAUGE
+// ============================================================
+(function animateGauge(){
+  const RISK_SCORE=78;
+  const fill=document.getElementById('gaugeFill');
+  const needle=document.getElementById('gaugeNeedle');
+  const valEl=document.getElementById('gaugeVal');
+
+  // Gauge arc length (semicircle radius=130)
+  const arcLen=Math.PI*130;
+  fill.style.strokeDasharray=`0 ${arcLen}`;
+  const fillLen=(RISK_SCORE/100)*arcLen;
+  setTimeout(()=>{fill.style.strokeDasharray=`${fillLen} ${arcLen}`},200);
+
+  // Needle rotation: -90deg (left/safe) to +90deg (right/danger)
+  needle.style.transformOrigin='160px 160px';
+  needle.style.transform='rotate(-90deg)';
+  const needleAngle=-90+(RISK_SCORE/100)*180;
+  setTimeout(()=>{needle.style.transform=`rotate(${needleAngle}deg)`},100);
+
+  // Animate number
+  let cur=0;
+  const step=()=>{
+    cur+=1;
+    if(cur>RISK_SCORE)cur=RISK_SCORE;
+    valEl.textContent=cur;
+    if(cur<RISK_SCORE)requestAnimationFrame(step);
+  };
+  setTimeout(step,600);
+})();
+
+// ============================================================
+// ANIMATE RINGS ON SCROLL
+// ============================================================
+(function animateRings(){
+  const observer=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('visible');
+        // Animate ring
+        const ring=e.target.querySelector('.ring-fg');
+        if(ring){
+          const dash=ring.dataset.dash;
+          const circ=ring.dataset.circ;
+          setTimeout(()=>{ring.style.strokeDasharray=`${dash} ${circ}`},300);
+        }
+      }
+    });
+  },{threshold:.15});
+  document.querySelectorAll('.cycle-card').forEach(c=>observer.observe(c));
+})();
+
+// ============================================================
+// SCROLL REVEAL
+// ============================================================
+(function scrollReveal(){
+  const obs=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+  },{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+})();
+
+// ============================================================
+// MASTER TIMELINE
+// ============================================================
+(function drawTimeline(){
+  const svg=document.getElementById('timeline-svg');
+  const W=1400,H=500;
+  const pad={l:60,r:60,t:40,b:60};
+  const gw=W-pad.l-pad.r, gh=H-pad.t-pad.b;
+  const minY=2010,maxY=2060;
+  // We'll show 1900-2060 but the interesting part is wider
+  const startYear=1900,endYear=2060;
+
+  function xScale(year){return pad.l+((year-startYear)/(endYear-startYear))*gw}
+  function yScale(val){return pad.t+gh/2-val*(gh/2)*0.85}
+
+  // Background grid
+  for(let yr=1900;yr<=2060;yr+=10){
+    const x=xScale(yr);
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    Object.entries({x1:x,y1:pad.t,x2:x,y2:H-pad.b,stroke:'var(--brd)','stroke-width':yr%50===0?0.8:0.3}).forEach(([k,v])=>line.setAttribute(k,v));
+    svg.appendChild(line);
+    if(yr%20===0){
+      const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x',x);txt.setAttribute('y',H-pad.b+20);
+      txt.setAttribute('class','tl-year');txt.textContent=yr;
+      svg.appendChild(txt);
+    }
+  }
+
+  // Zero line
+  const zeroLine=document.createElementNS('http://www.w3.org/2000/svg','line');
+  Object.entries({x1:pad.l,y1:yScale(0),x2:W-pad.r,y2:yScale(0),stroke:'var(--brd2)','stroke-width':1}).forEach(([k,v])=>zeroLine.setAttribute(k,v));
+  svg.appendChild(zeroLine);
+
+  // Draw sine waves for each cycle
+  const waveColors={
+    inventory:'var(--orange)',schwabe:'var(--cosmic)',hale:'var(--blue)',
+    kindex:'var(--purple)',kondratieff:'var(--gold)',gleissberg:'var(--teal)',
+    hegemony:'var(--red)',bingwu:'var(--pink)'
+  };
+
+  const waveLabels=[];
+  CYCLES.forEach(c=>{
+    const points=[];
+    for(let yr=startYear;yr<=endYear;yr+=0.5){
+      const phase=((yr-c.refTrough)/c.period)*2*Math.PI - Math.PI/2;
+      const val=Math.sin(phase);
+      points.push(`${xScale(yr)},${yScale(val)}`);
+    }
+    const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    path.setAttribute('points',points.join(' '));
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke',waveColors[c.id]||'var(--t2)');
+    path.setAttribute('stroke-width',1.2);
+    path.setAttribute('opacity',0.5);
+    svg.appendChild(path);
+    waveLabels.push({name:c.name,color:waveColors[c.id]});
+  });
+
+  // NOW line (2026)
+  const nowX=xScale(2026);
+  const nowLine=document.createElementNS('http://www.w3.org/2000/svg','line');
+  Object.entries({x1:nowX,y1:pad.t-10,x2:nowX,y2:H-pad.b+10,stroke:'var(--red)','stroke-width':2,'stroke-dasharray':'6 4',class:'tl-now-line'}).forEach(([k,v])=>nowLine.setAttribute(k,v));
+  svg.appendChild(nowLine);
+  const nowLabel=document.createElementNS('http://www.w3.org/2000/svg','text');
+  nowLabel.setAttribute('x',nowX);nowLabel.setAttribute('y',pad.t-15);
+  nowLabel.setAttribute('class','tl-now-label');nowLabel.textContent='2026 NOW';
+  svg.appendChild(nowLabel);
+
+  // Key events on timeline
+  const keyEvents=[
+    {y:1930,t:'大萧条',side:-1},{y:1970,t:'滞胀',side:1},
+    {y:1990,t:'苏联解体',side:-1},{y:2000,t:'互联网泡沫',side:1},
+    {y:2008,t:'金融危机',side:-1},{y:2020,t:'新冠疫情',side:1},
+    {y:2030,t:'K极小？',side:-1,future:true},{y:2049,t:'康波危机？',side:1,future:true}
+  ];
+  keyEvents.forEach(ev=>{
+    const ex=xScale(ev.y);
+    const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    Object.entries({cx:ex,cy:yScale(0),class:'tl-event-dot',fill:ev.future?'var(--t3)':'var(--gold)'}).forEach(([k,v])=>circle.setAttribute(k,v));
+    svg.appendChild(circle);
+    const label=document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('x',ex);
+    label.setAttribute('y',yScale(0)+ev.side*18);
+    label.setAttribute('text-anchor','middle');
+    label.setAttribute('font-family','var(--fm)');
+    label.setAttribute('font-size','10');
+    label.setAttribute('fill',ev.future?'var(--t3)':'var(--gold)');
+    label.textContent=`${ev.y} ${ev.t}`;
+    svg.appendChild(label);
+  });
+
+  // Danger zone highlight 2026-2030
+  const dz1=xScale(2026),dz2=xScale(2030);
+  const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  Object.entries({x:dz1,y:pad.t,width:dz2-dz1,height:gh,fill:'rgba(255,71,87,0.06)',rx:4,stroke:'rgba(255,71,87,0.15)','stroke-width':1}).forEach(([k,v])=>rect.setAttribute(k,v));
+  svg.appendChild(rect);
+  const dzLabel=document.createElementNS('http://www.w3.org/2000/svg','text');
+  dzLabel.setAttribute('x',(dz1+dz2)/2);dzLabel.setAttribute('y',H-pad.b+40);
+  dzLabel.setAttribute('text-anchor','middle');
+  dzLabel.setAttribute('font-family','var(--fm)');dzLabel.setAttribute('font-size','11');
+  dzLabel.setAttribute('fill','var(--red)');dzLabel.setAttribute('opacity',0.7);
+  dzLabel.textContent='HIGH RISK ZONE 2026-2030';
+  svg.appendChild(dzLabel);
+
+  // Legend
+  const legendEl=document.getElementById('tlLegend');
+  waveLabels.forEach(w=>{
+    legendEl.innerHTML+=`<div class="tl-legend-item"><span class="tl-legend-dot" style="background:${w.color}"></span>${w.name}</div>`;
+  });
+})();
+</script>
+</body>
+</html>
